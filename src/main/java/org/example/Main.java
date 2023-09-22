@@ -8,27 +8,22 @@ import com.opencsv.CSVWriter;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
-import netscape.javascript.JSObject;
-import org.json.simple.JSONObject;
-
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.List;
 
 public class Main {
 
 
     public static void main(String[] args) throws IOException {
-        createCSV("1,John,Smith,USA,25");
-        addInCSV("2,Inav,Petrov,RU,23");
-        String[] columnMapping = {"id", "firstName", "lastName", "country", "age"};
         String fileName = "data.csv";
-        List<Employee>list = parseCSV(columnMapping, fileName);
-        String json = listToJson(list);
+        createCSV("1,John,Smith,USA,25", fileName);
+        addInCSV("2,Inav,Petrov,RU,23", fileName);
+        String[] columnMapping = {"id", "firstName", "lastName", "country", "age"};
+        List<Employee>listEmployee = parseCSV(columnMapping, fileName);
+        String json = listToJson(listEmployee);
         System.out.println(json);
         writeString(json);
     }
@@ -44,19 +39,19 @@ public class Main {
 
     }
 
-    private static String listToJson(List<Employee> list) {
+    private static String listToJson(List<Employee> listEmployee) {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
-        Type listType = new TypeToken<List<Employee>>() {}.getType();
-        String json = gson.toJson(list, listType);
+        Type listEmployeeType = new TypeToken<List<Employee>>() {}.getType();
+        String json = gson.toJson(listEmployee, listEmployeeType);
         return json;
     }
 
-    private static List<Employee> parseCSV(String[] strings, String fileName) throws IOException {
+    private static List<Employee> parseCSV(String[] columnMapping, String fileName) throws IOException {
         CSVReader csvReader = new CSVReader(new FileReader(fileName));
         ColumnPositionMappingStrategy<Employee> strategy = new ColumnPositionMappingStrategy<>();
         strategy.setType(Employee.class);
-        strategy.setColumnMapping(strings);
+        strategy.setColumnMapping(columnMapping);
         CsvToBean<Employee> csv = new CsvToBeanBuilder<Employee>(csvReader)
                 .withMappingStrategy(strategy)
                 .build();
@@ -64,9 +59,9 @@ public class Main {
         return list;
     }
 
-    private static void addInCSV(String string) {
-        String[] employee = string.split(",");
-        try (CSVWriter writer = new CSVWriter(new FileWriter("data.csv", true))) {
+    private static void addInCSV(String infoEmployee, String fileName) {
+        String[] employee = infoEmployee.split(",");
+        try (CSVWriter writer = new CSVWriter(new FileWriter(fileName, true))) {
             writer.writeNext(employee);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -74,9 +69,9 @@ public class Main {
 
     }
 
-    public static void createCSV(String string) {
-        String[] employee = string.split(",");
-        try (CSVWriter writer = new CSVWriter(new FileWriter("data.csv"))) {
+    public static void createCSV(String infoEmployee, String fileName) {
+        String[] employee = infoEmployee.split(",");
+        try (CSVWriter writer = new CSVWriter(new FileWriter(fileName))) {
             writer.writeNext(employee);
         } catch (IOException e) {
             throw new RuntimeException(e);
